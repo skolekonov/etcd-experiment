@@ -2,7 +2,7 @@
 
 - name: Check if already set up
   stat:
-    path: {{ etcd_cert_dir }}/server.key"
+    path: "{{ etcd_cert_dir }}/server.key"
   register: etcd_cert_exists
 
 - name: Install certs
@@ -19,15 +19,15 @@
 
 - name: Run etcdadm join
   command: >-
-    etcdadm join
+    {{ bin_dir }}/etcdadm join
     --certs-dir {{ etcd_cert_dir }}
     --install-dir {{ bin_dir }}
     --version {{ etcd_version | replace('v', '') }}
-    hostvars[groups['etcd'][0]['ip']]
+    https://{{ hostvars[groups['etcd'][0]].ip }}:2379
   when: not etcd_cert_exists.stat.exists
 
 - name: Ensure etcd is running
   service:
     name: etcd
-    state: present
+    state: started
     enabled: yes

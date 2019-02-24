@@ -1,6 +1,6 @@
 - name: Check if already set up
   stat:
-    path: {{ etcd_cert_dir }}/peer.key"
+    path: "{{ etcd_cert_dir }}/peer.key"
   register: etcd_cert_exists
 
 - name: Ensure etcd cert dir

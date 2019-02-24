@@ -1,5 +1,6 @@
 - hosts: k8s-cluster:calico-rr:etcd
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  become: yes
   roles:
     - { role: kubespray-defaults}
-    - { role: etcd, tags: etcd }
+    - { role: etcdadm, tags: etcdadm }

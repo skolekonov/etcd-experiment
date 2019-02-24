@@ -1,0 +1,25 @@
+- name: Ensure etcd directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - "{{ bin_dir }}"
+    - "{{ etcd_cert_dir }}"
+
+- name: Check if etcdadm exists
+  stat:
+    path: "{{ bin_dir }}/etcdadm"
+  register: etcdadm_stat
+
+- name: Install dependency
+  package:
+    name: golang
+    state: present
+  when: not etcdadm_stat.stat.exists
+
+- name: Install etcdadm
+  command: go get -u github.com/platform9/etcdadm
+  environment:
+    GOBIN: "{{ bin_dir }}"
+  when: not etcdadm_stat.stat.exists

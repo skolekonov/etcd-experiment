@@ -1,0 +1,4 @@
+- name: Read in certificate
+  slurp:
+    src: "{{ cert.file }}"
+  register: "{{ cert.result_var }}"
