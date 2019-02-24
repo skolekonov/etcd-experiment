@@ -1,0 +1,33 @@
+- include_tasks: etcdadm_install.yml
+
+- name: Check if already set up
+  stat:
+    path: {{ etcd_cert_dir }}/server.key"
+  register: etcd_cert_exists
+
+- name: Install certs
+  copy:
+    content: "{{ item.content | b64decode }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  with_items:
+    - { dest: "{{ etcd_cert_dir }}/ca.crt", content: "{{ etcd_ca_cert }}", mode: "0644" }
+    - { dest: "{{ etcd_cert_dir }}/ca.key", content: "{{ etcd_ca_key }}", mode: "0600" }
+  when: not etcd_cert_exists.stat.exists
+
+- name: Run etcdadm join
+  command: >-
+    etcdadm join
+    --certs-dir {{ etcd_cert_dir }}
+    --install-dir {{ bin_dir }}
+    --version {{ etcd_version | replace('v', '') }}
+    hostvars[groups['etcd'][0]['ip']]
+  when: not etcd_cert_exists.stat.exists
+
+- name: Ensure etcd is running
+  service:
+    name: etcd
+    state: present
+    enabled: yes

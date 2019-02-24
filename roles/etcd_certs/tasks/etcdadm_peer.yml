@@ -1,0 +1,25 @@
+- name: Check if already set up
+  stat:
+    path: {{ etcd_cert_dir }}/peer.key"
+  register: etcd_cert_exists
+
+- name: Ensure etcd cert dir
+  file:
+    path: "{{ etcd_cert_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install certs
+  copy:
+    content: "{{ item.content | b64decode }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  with_items:
+    - { dest: "{{ etcd_cert_dir }}/ca.crt", content: "{{ etcd_ca_cert }}", mode: "0644" }
+    - { dest: "{{ etcd_cert_dir }}/peer.crt", content: "{{ etcd_peer_cert }}", mode: "0644" }
+    - { dest: "{{ etcd_cert_dir }}/peer.key", content: "{{ etcd_peer_key }}", mode: "0600" }
+  when: not etcd_cert_exists.stat.exists

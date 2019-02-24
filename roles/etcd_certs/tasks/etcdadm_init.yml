@@ -1,0 +1,35 @@
+- include_tasks: etcdadm_install.yml
+
+- name: Check if already set up
+  stat:
+    path: {{ etcd_cert_dir }}/server.key"
+  register: etcd_cert_exists
+
+- name: Run etcdadm init
+  command: >-
+    etcdadm init
+    --certs-dir {{ etcd_cert_dir }}
+    --install-dir {{ bin_dir }}
+    --version {{ etcd_version | replace('v', '') }}
+  when: not etcd_cert_exists.stat.exists
+
+- name: Ensure etcd is running
+  service:
+    name: etcd
+    state: present
+    enabled: yes
+
+- name: Fetch etcd certs
+  include_tasks: slurp_cert.yml
+  with_items:
+    - { result_var: etc_ca_cert_result, file: "{{ etcd_cert_dir }}/ca.crt" }
+    - { result_var: etc_ca_key_result, file: "{{ etcd_cert_dir }}/ca.key" }
+    - { result_var: etc_peer_cert_result, file: "{{ etcd_cert_dir }}/peer.crt" }
+    - { result_var: etc_peer_key_result, file: "{{ etcd_cert_dir }}/peer.key" }
+
+- name: Set facts with cert contents (in base64 encoding)
+  set_fact:
+    etcd_ca_cert: "{{ etcd_ca_cert_result['content'] }}"
+    etcd_ca_key: "{{ etcd_ca_key_result['content'] }}"
+    etcd_peer_cert: "{{ etcd_peer_cert_result['content'] }}"
+    etcd_peer_key: "{{ etcd_peer_key_result['content'] }}"

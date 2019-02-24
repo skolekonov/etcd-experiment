@@ -1,0 +1,11 @@
+- name: etcdadm init
+  include_tasks: etcdadm_init.yml
+  when: inventory_hostname == groups['etcd']|first
+
+- name: etcdadm join
+  include_tasks: etcdadm_join.yml
+  when: inventory_hostname in groups['etcd'][1:]
+
+- name: etcd peer setup
+  include_tasks: etcd_peer.yml
+  when: inventory_hostname not in groups['etcd']
