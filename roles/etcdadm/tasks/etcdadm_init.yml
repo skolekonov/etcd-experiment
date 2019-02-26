@@ -26,15 +26,15 @@
   with_items:
     - { result_var: etcd_ca_cert_result, file: "{{ etcd_cert_dir }}/ca.crt" }
     - { result_var: etcd_ca_key_result, file: "{{ etcd_cert_dir }}/ca.key" }
-    - { result_var: etcd_peer_cert_result, file: "{{ etcd_cert_dir }}/peer.crt" }
-    - { result_var: etcd_peer_key_result, file: "{{ etcd_cert_dir }}/peer.key" }
+    - { result_var: etcdctl_client_cert_result, file: "{{ etcd_cert_dir }}/etcdctl-etcd-client.crt" }
+    - { result_var: etcdctl_client_key_result, file: "{{ etcd_cert_dir }}/etcdctl-etcd-client.key" }
 
 - name: Set facts with cert contents (in base64 encoding)
   set_fact:
     etcd_ca_cert: "{{ etcd_ca_cert_result['content'] }}"
     etcd_ca_key: "{{ etcd_ca_key_result['content'] }}"
-    etcd_peer_cert: "{{ etcd_peer_cert_result['content'] }}"
-    etcd_peer_key: "{{ etcd_peer_key_result['content'] }}"
+    etcdctl_client_cert: "{{ etcdctl_client_cert_result['content'] }}"
+    etcdctl_client_key: "{{ etcdctl_client_key_result['content'] }}"
 
 - name: Write certs to /root/etcd_certs.yml
   copy:
@@ -42,6 +42,6 @@
       ---
       etcd_ca_cert: "{{ etcd_ca_cert }}"
       etcd_ca_key: "{{ etcd_ca_key }}"
-      etcd_peer_cert: "{{ etcd_peer_cert }}"
-      etcd_peer_key: "{{ etcd_peer_key }}"
+      etcdctl_client_cert: "{{ etcdctl_client_cert }}"
+      etcdctl_client_key: "{{ etcdctl_client_key }}"
     dest: /root/etcd_certs.yml

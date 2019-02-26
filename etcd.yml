@@ -4,3 +4,5 @@
   roles:
     - { role: kubespray-defaults}
     - { role: etcdadm, tags: etcdadm }
+    - { role: kubespray-etcd-compat, tags: kubespray-etcd-compat }
+

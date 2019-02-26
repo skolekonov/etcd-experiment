@@ -1,0 +1,18 @@
+- name: Ensure etcd cert dir
+  file:
+    path: "{{ etcd_cert_dir }}"
+    state: directory
+
+- name: Create symlinks for files that are present
+  file:
+    src: "{{ etcd_cert_dir}}/{{ item.src }}"
+    dest: "{{ etcd_cert_dir }}/{{ item.dest }}"
+    state: link
+  with_items:
+    - { src: ca.crt, dest: ca.pem }
+    - { src: ca.key, dest: ca-key.pem }
+    - { src: etcdctl-etcd-client.crt, dest: "admin-{{ inventory_hostname }}.pem" }
+    - { src: etcdctl-client.key, dest: "admin-{{ inventory_hostname }}-key.pem" }
+    - { src: etcdctl-etcd-client.crt, dest: "node-{{ inventory_hostname }}.pem" }
+    - { src: etcdctl-client.key, dest: "node-{{ inventory_hostname }}-key.pem" }
+  failed_when: false
