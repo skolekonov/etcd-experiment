@@ -6,3 +6,4 @@
     - { role: etcdadm, tags: etcdadm }
     - { role: kubespray-etcd-compat, tags: kubespray-etcd-compat }
 
+- include: kubespray-without-etcd.yml
