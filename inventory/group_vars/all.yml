@@ -1,0 +1,13 @@
+ansible_user: ubuntu
+ansible_connection: local
+kube_version: v1.14.0-beta.1
+kubeadm_control_plane: true
+etcd_cert_dir: /etc/ssl/etcd/ssl
+kube_etcd_cacert_file: ca.crt
+kube_etcd_cert_file: etcdctl-etcd-client.crt
+kube_etcd_key_file: etcdctl-etcd-client.key
+
+kubeadm_download_url: https://artifactory.mcp.mirantis.net/binary-dev-local/mirantis/kubernetes/kubeadm/kubeadm_v1.15.0-alpha.0-886_1551862840536
+kubeadm_checksums:
+  amd64:
+    v1.14.0-beta.1: 2dc7bf75c877eca0fc65d477079eb938c336622c37616faca7ee5e2c6d94e903

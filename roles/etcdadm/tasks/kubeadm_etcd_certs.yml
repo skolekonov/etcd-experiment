@@ -1,0 +1,23 @@
+---
+- name: create kubeadm config for downloading certs
+  template:
+    src: kubeadm-downloadcerts.yaml.j2
+    dest: /etc/kubernetes/kubeadm-downloadcerts.yaml
+
+- name: download certs from kubeadm
+  command: >-
+    {{ bin_dir }}/kubeadm join phase
+    control-plane-prepare download-certs
+    --certificate-key {{ kubeadm_certificate_key }}
+    --config /etc/kubernetes/kubeadm-downloadcerts.yaml
+
+- name: Link etcd certificates
+  file:
+    src: "/etc/kubernetes/ssl/{{ item }}"
+    dest: "{{ etcd_cert_dir }}/{{ item }}"
+    state: hard
+    force: yes
+  with_items:
+    - "{{ kube_etcd_cacert_file }}"
+    - "{{ kube_etcd_cert_file }}"
+    - "{{ kube_etcd_key_file }}"

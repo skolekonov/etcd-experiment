@@ -1,0 +1,12 @@
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: {{ hostvars[groups['kube-master'][0]]['ip'] }}:6443
+    token: {{ kubeadm_token }}
+    unsafeSkipCAVerification: true
+  timeout: 120s
+  tlsBootstrapToken: {{ kubeadm_token }}
+nodeRegistration:
+  name: {{ inventory_hostname  }}
+

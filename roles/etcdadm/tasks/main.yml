@@ -2,6 +2,10 @@
   include_tasks: etcdadm_init.yml
   when: inventory_hostname == groups['etcd']|first
 
+#- name: get etcd certs from kubeadm
+#  include_tasks: kubeadm_etcd_certs.yml
+#  when: inventory_hostname != groups['etcd']|first
+
 - name: etcdadm join
   include_tasks: etcdadm_join.yml
   when: inventory_hostname in groups['etcd'][1:]

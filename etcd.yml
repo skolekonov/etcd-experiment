@@ -1,9 +1,42 @@
-- hosts: k8s-cluster:calico-rr:etcd
+- hosts: kube-master[0]
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  become: yes
+  roles:
+    - { role: kubespray-defaults}
+    - { role: kubernetes/preinstall, tags: preinstall }
+    - { role: "container-engine", tags: "container-engine", when: deploy_container_engine|default(true) }
+    - { role: download, tags: download, when: "not skip_downloads" }
+    - { role: etcdadm, tags: etcdadm }
+    - { role: kubespray-etcd-compat, tags: kubespray-etcd-compat }
+  environment: "{{proxy_env}}"
+
+- include: kubespray-without-etcd-before-calico.yml
+
+- hosts: etcd:k8s-cluster:!kube-master[0]
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   become: yes
   roles:
     - { role: kubespray-defaults}
     - { role: etcdadm, tags: etcdadm }
     - { role: kubespray-etcd-compat, tags: kubespray-etcd-compat }
+  environment: "{{proxy_env}}"
 
-- include: kubespray-without-etcd.yml
+- include: kubespray-without-etcd-calico-and-after.yml
+#- hosts: kube-master[0]
+#  become: yes
+#  tasks:
+#    - name: Parse kubeadm certificate key
+#      set_fact:
+#        kubeadm_certificate_key: "{{ item | regex_search('--certificate-key ([^ ]+)','\\1') | first }}"
+#      with_items: "{{ kubeadm_init_output.stdout_lines }}"
+#      when:
+#        - kubeadm_init_output is defined
+#        - item | trim | match('.*--certificate-key .*')
+#
+#    - name: Write kubeadm certificate key to vars file
+#      lineinfile:
+#        dest: /root/etcd_certs.yml
+#        line: "kubeadm_certificate_key: {{ kubeadm_certificate_key }}"
+#        regexp: "^kubeadm_certificate_key: .*$"
+#        state: present
+#        backup: yes
