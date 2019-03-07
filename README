@@ -1,0 +1,14 @@
+set up 3 nodes with ssh auth
+add to inventory in inventory/hosts.yml
+checkout this repository
+cd etcd-experiment
+git clone https://github.com/kubernetes-sigs/kubespray
+cd kubespray
+git fetch origin +refs/pull/*/merge:refs/remotes/origin/pr/*
+git checkout origin/pr/4317
+cd ..
+rsync this directory to all 3 nodes
+run setup.sh
+run . ~/venv/bin/activate
+ansible-playbook -i inventory/hosts.yml etcd.yml --limit `hostname`  -b
+
