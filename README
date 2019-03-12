@@ -10,5 +10,8 @@ cd ..
 rsync this directory to all 3 nodes
 run setup.sh
 run . ~/venv/bin/activate
+on all 3 nodes:
 ansible-playbook -i inventory/hosts.yml etcd.yml --limit `hostname`  -b
 
+to reset:
+./reset.sh
