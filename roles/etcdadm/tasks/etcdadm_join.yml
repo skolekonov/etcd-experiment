@@ -24,6 +24,10 @@
     --install-dir {{ bin_dir }}
     --version {{ etcd_version | replace('v', '') }}
     https://{{ hostvars[groups['etcd'][0]].ip }}:2379
+  register: etcdadm_join
+  until: etcdadm_join is succeeded
+  retries: 5
+  delay: 5
   when: not etcd_cert_exists.stat.exists
 
 - name: Ensure etcd is running
