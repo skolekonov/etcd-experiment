@@ -1,6 +1,16 @@
+- name: etcdadm install only
+  include_tasks: etcdadm_install.yml
+  when: etcdadm_phase == "install"
+
+- name: etcd peer setup for install only
+  include_tasks: etcd_peer.yml
+  when: etcdadm_phase == "install"
+
 - name: etcdadm init
   include_tasks: etcdadm_init.yml
-  when: inventory_hostname == groups['etcd']|first
+  when:
+    - etcdadm_phase in ['all', 'deploy']
+    - inventory_hostname == groups['etcd']|first
 
 #- name: get etcd certs from kubeadm
 #  include_tasks: kubeadm_etcd_certs.yml
@@ -8,8 +18,16 @@
 
 - name: etcdadm join
   include_tasks: etcdadm_join.yml
-  when: inventory_hostname in groups['etcd'][1:]
+  when:
+    - etcdadm_phase in ['all', 'deploy']
+    - inventory_hostname in groups['etcd'][1:]
 
 - name: etcd peer setup
   include_tasks: etcd_peer.yml
-  when: inventory_hostname not in groups['etcd']
+  when:
+    - etcdadm_phase in ['all', 'deploy']
+    - inventory_hostname not in groups['etcd']
+
+#- fail:
+#  when:
+#    - etcdadm_phase in ['all', 'deploy']

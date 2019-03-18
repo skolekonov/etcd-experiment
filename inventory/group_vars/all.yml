@@ -11,3 +11,5 @@ kubeadm_download_url: https://artifactory.mcp.mirantis.net/binary-dev-local/mira
 kubeadm_checksums:
   amd64:
     v1.14.0-beta.1: 2dc7bf75c877eca0fc65d477079eb938c336622c37616faca7ee5e2c6d94e903
+
+ignore_assert_errors: true

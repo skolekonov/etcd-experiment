@@ -20,6 +20,6 @@
     mode: "{{ item.mode }}"
   with_items:
     - { dest: "{{ etcd_cert_dir }}/ca.crt", content: "{{ etcd_ca_cert }}", mode: "0644" }
-    - { dest: "{{ etcd_cert_dir }}/peer.crt", content: "{{ etcd_peer_cert }}", mode: "0644" }
-    - { dest: "{{ etcd_cert_dir }}/peer.key", content: "{{ etcd_peer_key }}", mode: "0600" }
+    - { dest: "{{ etcd_cert_dir }}/etcdctl-etcd-client.crt", content: "{{ etcdctl_client_cert }}", mode: "0644" }
+    - { dest: "{{ etcd_cert_dir }}/etcdctl-etcd-client.key", content: "{{ etcdctl_client_key }}", mode: "0600" }
   when: not etcd_cert_exists.stat.exists

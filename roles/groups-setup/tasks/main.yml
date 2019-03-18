@@ -1,0 +1,64 @@
+# Logic for adding nodes:
+# If etcdadm is already set up, get nodes from etcd. If <3 etcds, become etcd
+# node and k8s master. If etcds >=3, just be a node.
+- name: Get control plane nodes from etcd
+  command: >-
+    {{ bin_dir }}/etcdctl member list
+    --cacert {{ etcd_cert_dir }}/ca.crt
+    --cert {{ etcd_cert_dir }}/etcdctl-etcd-client.crt
+    --key {{ etcd_cert_dir }}/etcdctl-etcd-client.key
+    {% if first_node is defined and first_node != "" %}
+    --endpoints https://{{ first_node }}:2379
+    {% else %}
+    --endpoints https://{{ ip | default(ansible_default_ipv4['address']) }}:2379
+    {% endif %}
+    -w json
+  environment:
+    ETCDCTL_API: 3
+  register: etcd_member_list
+  failed_when: false
+
+- name: Add nodes based on etcd member list
+  add_host:
+    hostname: "{{ item.name }}"
+    ip: "{{ item.peerURLs[0] | regex_replace('^.*://([^:]*):[0-9]+', '\\1') }}"
+    groups:
+      - etcd
+      - kube-master
+      - kube-node
+      - k8s-cluster
+  with_items: "{{ (etcd_member_list.stdout | from_json).members  }}"
+  when:
+    - etcd_member_list is defined
+    - etcd_member_list.rc == 0
+
+- name: Add self as etcd+master
+  add_host:
+    hostname: "{{ ansible_hostname }}"
+    ip: "{{ ansible_default_ipv4['address'] }}"
+    groups:
+      - etcd
+      - kube-master
+      - kube-node
+      - k8s-cluster
+  when:
+    - etcd_member_list.rc != 0 or groups.get('etcd',[]) | length < 3
+
+- name: Add self as normal node
+  add_host:
+    hostname: "{{ ansible_hostname }}"
+    ip: "{{ ansible_default_ipv4['address'] }}"
+    groups:
+      - kube-node
+      - k8s-cluster
+  when:
+    - groups.get('etcd',[]) | length >= 3
+
+#- name: debug
+#  debug:
+#    msg: "{{ groups['kube-master'] }}"
+#- name: debug
+#  debug:
+#    msg: "{{ groups['kube-master'][0] }}"
+#
+#- fail:
