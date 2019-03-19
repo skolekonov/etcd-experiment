@@ -18,7 +18,16 @@
   register: etcd_member_list
   failed_when: false
 
+- set_fact:
+    etcd_output: "{{ (etcd_member_list.stdout | from_json) }}"
+  when:
+    - etcd_member_list is defined
+    - etcd_member_list.rc == 0
+
 - name: Add nodes based on etcd member list
+  when:
+    - etcd_member_list is defined
+    - etcd_member_list.rc == 0
   add_host:
     hostname: "{{ item.name }}"
     ip: "{{ item.peerURLs[0] | regex_replace('^.*://([^:]*):[0-9]+', '\\1') }}"
@@ -27,10 +36,7 @@
       - kube-master
       - kube-node
       - k8s-cluster
-  with_items: "{{ (etcd_member_list.stdout | from_json).members  }}"
-  when:
-    - etcd_member_list is defined
-    - etcd_member_list.rc == 0
+  with_items: "{{ etcd_output.members }}"
 
 - name: Add self as etcd+master
   add_host:
@@ -42,6 +48,7 @@
       - kube-node
       - k8s-cluster
   when:
+    - inventory_hostname in groups['kube-master']
     - etcd_member_list.rc != 0 or groups.get('etcd',[]) | length < 3
 
 - name: Add self as normal node
