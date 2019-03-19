@@ -1,0 +1,25 @@
+- name: Ensure etcd cert dir
+  file:
+    path: "{{ etcd_cert_dir }}"
+    state: directory
+
+- name: Check if already set up
+  stat:
+    path: "{{ etcd_cert_dir }}/server.key"
+  register: etcd_cert_exists
+
+- name: Install certs
+  copy:
+    content: "{{ item.content | b64decode }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  with_items:
+    - { dest: "{{ etcd_cert_dir }}/ca.crt", content: "{{ etcd_ca_cert|default('') }}", mode: "0644" }
+    - { dest: "{{ etcd_cert_dir }}/client.crt", content: "{{ etcdctl_client_cert|default('') }}", mode: "0644" }
+    - { dest: "{{ etcd_cert_dir }}/ca.key", content: "{{ etcd_ca_key|default('') }}", mode: "0600" }
+    - { dest: "{{ etcd_cert_dir }}/client.key", content: "{{ etcdctl_client_key|default('') }}", mode: "0600" }
+  when:
+    - not etcd_cert_exists.stat.exists
+    - item.content != ""
