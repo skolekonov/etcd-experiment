@@ -1,6 +1,17 @@
 # Logic for adding nodes:
 # Control plane nodes has is_master_node = true
 
+- name: Check if etcdctl exists
+  stat:
+    path: "{{ bin_dir }}/etcdctl"
+  register: etcdctl_stat
+
+- name: Install etcdadm
+  command: go get -u github.com/coreos/etcd/etcdctl
+  environment:
+    GOBIN: "{{ bin_dir }}"
+  when: not etcdctl_stat.stat.exists
+
 - name: Get control plane nodes from etcd
   command: >-
     {{ bin_dir }}/etcdctl member list
@@ -58,7 +69,7 @@
       - kube-node
       - k8s-cluster
   when:
-    - is_master_node
+    - etcd_member_list.rc != 0 or groups.get('etcd',[]) | length < 3
 
 - name: Add self as normal node
   add_host:
@@ -68,7 +79,7 @@
       - kube-node
       - k8s-cluster
   when:
-    - not is_master_node
+    - groups.get('etcd',[]) | length >= 3
 
 # Uncomment below lines for testing node order
 #- name: debug
