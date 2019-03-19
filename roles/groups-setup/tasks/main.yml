@@ -1,6 +1,17 @@
 # Logic for adding nodes:
 # If etcdadm is already set up, get nodes from etcd. If <3 etcds, become etcd
 # node and k8s master. If etcds >=3, just be a node.
+- name: Check if etcdadm exists
+  stat:
+    path: "{{ bin_dir }}/etcdctl"
+  register: etcdctl_stat
+
+- name: Install etcdadm
+  command: go get -u github.com/coreos/etcd/etcdctl
+  environment:
+    GOBIN: "{{ bin_dir }}"
+  when: not etcdctl_stat.stat.exists
+
 - name: Get control plane nodes from etcd
   command: >-
     {{ bin_dir }}/etcdctl member list
