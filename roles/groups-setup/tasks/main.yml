@@ -1,6 +1,5 @@
 # Logic for adding nodes:
-# If etcdadm is already set up, get nodes from etcd. If <3 etcds, become etcd
-# node and k8s master. If etcds >=3, just be a node.
+# Control plane nodes has is_master_node = true
 - name: Check if etcdctl exists
   stat:
     path: "{{ bin_dir }}/etcdctl"
@@ -69,7 +68,7 @@
       - kube-node
       - k8s-cluster
   when:
-    - etcd_member_list.rc != 0 or groups.get('etcd',[]) | length < 3
+    - is_master_node
 
 - name: Add self as normal node
   add_host:
@@ -79,7 +78,7 @@
       - kube-node
       - k8s-cluster
   when:
-    - groups.get('etcd',[]) | length >= 3
+    - not is_master_node
 
 # Uncomment below lines for testing node order
 #- name: debug
