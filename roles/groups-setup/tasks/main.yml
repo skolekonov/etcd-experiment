@@ -29,16 +29,7 @@
   register: etcd_member_list
   failed_when: false
 
-- set_fact:
-    etcd_output: "{{ (etcd_member_list.stdout | from_json) }}"
-  when:
-    - etcd_member_list is defined
-    - etcd_member_list.rc == 0
-
-- name: Add nodes based on etcd member list
-  when:
-    - etcd_member_list is defined
-    - etcd_member_list.rc == 0
+- name: Add first_node first to ensure order
   add_host:
     hostname: "{{ item.name }}"
     ip: "{{ item.peerURLs[0] | regex_replace('^.*://([^:]*):[0-9]+', '\\1') }}"
@@ -47,7 +38,26 @@
       - kube-master
       - kube-node
       - k8s-cluster
-  with_items: "{{ etcd_output.members }}"
+  with_items: "{{ (etcd_member_list.stdout | default('[]', true) | from_json).members  }}"
+  when:
+    - etcd_member_list is defined
+    - etcd_member_list.rc == 0
+    - first_node == item.peerURLs[0] | regex_replace('^.*://([^:]*):[0-9]+', '\\1')
+
+- name: Add other nodes based on etcd member list
+  add_host:
+    hostname: "{{ item.name }}"
+    ip: "{{ item.peerURLs[0] | regex_replace('^.*://([^:]*):[0-9]+', '\\1') }}"
+    groups:
+      - etcd
+      - kube-master
+      - kube-node
+      - k8s-cluster
+  with_items: "{{ (etcd_member_list.stdout | default('[]', true) | from_json).members  }}"
+  when:
+    - etcd_member_list is defined
+    - etcd_member_list.rc == 0
+    - first_node != item.peerURLs[0] | regex_replace('^.*://([^:]*):[0-9]+', '\\1')
 
 - name: Add self as etcd+master
   add_host:
@@ -72,6 +82,7 @@
   when:
     - groups.get('etcd',[]) | length >= 3
 
+# Uncomment below lines for testing node order
 #- name: debug
 #  debug:
 #    msg: "{{ groups['kube-master'] }}"
