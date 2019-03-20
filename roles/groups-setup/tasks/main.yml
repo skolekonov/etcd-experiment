@@ -69,7 +69,6 @@
       - kube-node
       - k8s-cluster
   when:
-    - inventory_hostname in groups['kube-master']
     - etcd_member_list.rc != 0 or groups.get('etcd',[]) | length < 3
 
 - name: Add self as normal node
