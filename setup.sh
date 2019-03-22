@@ -1,5 +1,5 @@
 sudo apt-get update && \
-sudo apt-get install -y vim python-pip python-virtualenv git && \
+sudo apt-get install -y vim python-pip python-virtualenv git rng-tools && \
 virtualenv ~/venv && \
 . ~/venv/bin/activate && \
 git clone https://github.com/mattymo/etcd-experiment etcd || : && \
