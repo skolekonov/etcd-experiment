@@ -3,8 +3,8 @@
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
     - { role: kubespray-defaults}
-    - { role: kubernetes/kubeadm, tags: kubeadm}
     - { role: network_plugin, tags: network }
+    - { role: kubernetes/kubeadm, tags: kubeadm}
 
 - hosts: kube-master[0]
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"

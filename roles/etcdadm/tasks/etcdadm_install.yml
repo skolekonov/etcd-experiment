@@ -18,7 +18,7 @@
     state: present
   when: not etcdadm_stat.stat.exists
 
-- name: Install etcdadm
+- name: Install etcdctl
   command: go get -u github.com/platform9/etcdadm
   environment:
     GOBIN: "{{ bin_dir }}"
