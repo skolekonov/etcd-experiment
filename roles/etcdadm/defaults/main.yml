@@ -1,5 +1,6 @@
 bin_dir: /usr/local/bin
 etcd_cert_dir: /etc/etcd/pki
 etcd_version: "3.3.8"
+etcd_install_dir: /usr/local/bin
 # Used to split up role. Options: all, install, deploy
 etcdadm_phase: all

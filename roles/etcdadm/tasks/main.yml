@@ -28,6 +28,12 @@
     - etcdadm_phase in ['all', 'deploy']
     - inventory_hostname not in groups['etcd']
 
+- name: etcdadm reset
+  include_tasks: etcdadm_reset.yml
+  when:
+    - etcdadm_phase == "reset"
+    - inventory_hostname in groups['etcd']
+
 #- fail:
 #  when:
 #    - etcdadm_phase in ['all', 'deploy']
