@@ -1,0 +1,11 @@
+- name: Check if already set up
+  stat:
+    path: "{{ etcd_cert_dir }}/server.key"
+  register: etcd_cert_exists
+
+- name: Run etcdadm reset
+  command: >-
+    {{ bin_dir }}/etcdadm reset
+    --certs-dir {{ etcd_cert_dir }}
+    --install-dir {{ etcd_install_dir }}
+  when: etcd_cert_exists.stat.exists

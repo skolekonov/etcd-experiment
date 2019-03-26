@@ -36,7 +36,6 @@
     groups:
       - etcd
       - kube-master
-      - kube-node
       - k8s-cluster
   with_items: "{{ (etcd_member_list.stdout | default('[]', true) | from_json).members  }}"
   when:
@@ -51,7 +50,6 @@
     groups:
       - etcd
       - kube-master
-      - kube-node
       - k8s-cluster
   with_items: "{{ (etcd_member_list.stdout | default('[]', true) | from_json).members  }}"
   when:
@@ -66,7 +64,6 @@
     groups:
       - etcd
       - kube-master
-      - kube-node
       - k8s-cluster
   when:
     - etcd_member_list.rc != 0 or groups.get('etcd',[]) | length < 3

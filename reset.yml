@@ -1,0 +1,9 @@
+- hosts: all
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  become: yes
+  roles:
+    - { role: kubespray-defaults }
+    - { role: groups-setup, tags: groups-setup }
+    - { role: kubeadm-reset }
+    - { role: etcdadm, tags: etcdadm, etcdadm_phase: reset }
+  environment: "{{proxy_env}}"

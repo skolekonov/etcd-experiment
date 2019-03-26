@@ -1,0 +1,18 @@
+- name: kubeadm | Check if kubeadm has already run
+  stat:
+    path: "/var/lib/kubelet/config.yaml"
+  register: kubeadm_already_run
+
+- name: kubeadm | Reset current node
+  command: >-
+    {{ bin_dir }}/kubeadm reset
+    -f
+    --cert-dir {{ kube_cert_dir }}
+  when:
+    - kubeadm_already_run.stat.exists
+
+- name: Remove the node from a cluster
+  command: "{{ bin_dir }}/kubectl delete node --wait=true {{ inventory_hostname }}"
+  when:
+    - kubeadm_already_run.stat.exists
+    - inventory_hostname in groups['kube-master']
